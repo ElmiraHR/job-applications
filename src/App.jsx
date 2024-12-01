@@ -154,7 +154,9 @@ const App = () => {
                     </div>
                 </Modal>
             )}
+            <p className={s.co}>© Corporate 2024 Alirel</p>
         </div>
+       
     );
 };
 
