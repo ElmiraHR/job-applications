@@ -92,7 +92,7 @@ const App = () => {
                 onChange={(e) => setNewSource(e.target.value)}
             />
             <button className={s.button} onClick={handleAddApplication}>Add vacancy</button>
-            <ul>
+            <ol>
                 {applications.map(app => (
                     <li key={app.id} onClick={() => openModal(app)}>
                         <span style={{ textDecoration: app.completed ? 'line-through' : 'none' }}>
@@ -100,7 +100,7 @@ const App = () => {
                         </span>
                     </li>
                 ))}
-            </ul>
+            </ol>
 
             {modalOpen && selectedApplication && (
                 <Modal 

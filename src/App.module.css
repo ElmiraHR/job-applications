@@ -48,7 +48,7 @@ justify-content: center;
   margin: 0 auto;
   border-radius: 5px;
 }
-ul{
+ol{
   text-align: left;
 }
 .input,.description::placeholder{
