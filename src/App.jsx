@@ -154,7 +154,7 @@ const App = () => {
                     </div>
                 </Modal>
             )}
-            <p className={s.co}>© Corporate 2024 Alirel</p>
+            <p className={s.co}>© Corporate 2024 Elmira</p>
         </div>
        
     );
