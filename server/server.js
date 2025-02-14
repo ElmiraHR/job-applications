@@ -1,79 +1,63 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const fs = require('fs');
+import express from 'express';
+import cors from 'cors';
+import fs from 'fs/promises';
+
 const app = express();
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json({ limit: '50mb' })); // Увеличиваем лимит запроса
 
 const FILE_PATH = './data.json';
 
-// Получение данных из файла
-app.get('/applications', (req, res) => {
-    fs.readFile(FILE_PATH, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Ошибка чтения файла:', err);
-            return res.status(500).json({ error: 'Ошибка чтения файла' });
-        }
-
-        try {
-            const applications = JSON.parse(data || '[]'); // Парсим содержимое файла
-            res.json(applications);
-        } catch (parseError) {
-            console.error('Ошибка парсинга JSON:', parseError);
-            res.status(500).json({ error: 'Ошибка парсинга данных' });
-        }
-    });
+// Получение данных
+app.get('/applications', async (req, res) => {
+    try {
+        const data = await fs.readFile(FILE_PATH, 'utf8');
+        const applications = JSON.parse(data || '[]');
+        res.json(applications);
+    } catch (err) {
+        console.error('Ошибка чтения файла:', err);
+        res.status(500).json({ error: 'Ошибка чтения файла' });
+    }
 });
 
-// Сохранение новой заявки
-app.post('/applications', (req, res) => {
-    const newApplication = req.body;
-
-    fs.readFile(FILE_PATH, 'utf8', (err, data) => {
-        if (err && err.code !== 'ENOENT') {
-            console.error('Ошибка чтения файла:', err);
-            return res.status(500).json({ error: 'Ошибка чтения файла' });
-        }
+// Добавление новой заявки
+app.post('/applications', async (req, res) => {
+    try {
+        const newApplication = req.body;
 
         let applications = [];
         try {
-            applications = data ? JSON.parse(data) : [];
-        } catch (parseError) {
-            console.error('Ошибка парсинга JSON:', parseError);
-            applications = [];
+            const data = await fs.readFile(FILE_PATH, 'utf8');
+            applications = JSON.parse(data || '[]');
+        } catch (err) {
+            if (err.code !== 'ENOENT') throw err;
         }
 
-        applications.push(newApplication); // Добавляем новую заявку
-
-        // Перезаписываем файл с обновлённым массивом
-        fs.writeFile(FILE_PATH, JSON.stringify(applications, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error('Ошибка записи в файл:', err);
-                return res.status(500).json({ error: 'Ошибка записи в файл' });
-            }
-            res.status(200).json({ message: 'Заявка добавлена' });
-        });
-    });
+        applications.push(newApplication);
+        await fs.writeFile(FILE_PATH, JSON.stringify(applications, null, 2), 'utf8');
+        res.status(200).json({ message: 'Заявка добавлена' });
+    } catch (err) {
+        console.error('Ошибка обработки запроса:', err);
+        res.status(500).json({ error: 'Ошибка обработки запроса' });
+    }
 });
 
-// Обновление всех данных (перезапись всего массива)
-app.put('/applications', (req, res) => {
-    const updatedApplications = req.body;
+// Обновление всех данных
+app.put('/applications', async (req, res) => {
+    try {
+        const updatedApplications = req.body;
 
-    if (!Array.isArray(updatedApplications)) {
-        console.error('Ошибка: входящие данные не являются массивом.');
-        return res.status(400).json({ error: 'Входящие данные должны быть массивом.' });
-    }
-
-    fs.writeFile(FILE_PATH, JSON.stringify(updatedApplications, null, 2), 'utf8', (err) => {
-        if (err) {
-            console.error('Ошибка записи в файл:', err);
-            return res.status(500).json({ error: 'Ошибка записи в файл' });
+        if (!Array.isArray(updatedApplications)) {
+            return res.status(400).json({ error: 'Входящие данные должны быть массивом.' });
         }
+
+        await fs.writeFile(FILE_PATH, JSON.stringify(updatedApplications, null, 2), 'utf8');
         res.status(200).json({ message: 'Данные обновлены' });
-    });
+    } catch (err) {
+        console.error('Ошибка обработки запроса:', err);
+        res.status(500).json({ error: 'Ошибка обработки запроса' });
+    }
 });
 
 const PORT = 5001;
