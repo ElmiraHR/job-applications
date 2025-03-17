@@ -95,10 +95,16 @@ const App = () => {
             <ol>
                 {applications.map(app => (
                     <li key={app.id} onClick={() => openModal(app)}>
-                        <span style={{ textDecoration: app.completed ? 'line-through' : 'none' }}>
-                            {app.title} - {app.date} {app.time} - {app.source}
-                        </span>
-                    </li>
+                    <span
+                        style={{
+                            textDecoration: app.completed ? 'line-through' : 'none',
+                            color: app.completed ? 'red' : 'inherit'
+                        }}
+                    >
+                        {app.title} - {app.date} {app.time} - {app.source}
+                    </span>
+                </li>
+                
                 ))}
             </ol>
 
@@ -154,7 +160,9 @@ const App = () => {
                     </div>
                 </Modal>
             )}
-            <p className={s.co}>© Corporate 2024 Elmira</p>
+            <div className={s.co}>
+            <p >© Corporate 2024 Elmira</p>
+            </div>
         </div>
        
     );
